@@ -163,12 +163,16 @@ async function main() {
   console.log(`[enrich] fetching corp_cls (concurrency=${CONCURRENCY})...`);
   const fetched = await pool(
     toFetch,
-    async (s) => ({
-      id: s.id,
-      stock_code: s.stock_code,
-      currentMarket: s.market,
-      newMarket: dartClsToMarket((await fetchCompanyCorpCls(s.corp_code, apiKey)) ?? undefined),
-    }),
+    async (s) => {
+      const cls = await fetchCompanyCorpCls(s.corp_code, apiKey);
+      // null이면 fetch 실패 — 기존 market 유지 (ETC로 덮어쓰지 않음)
+      return {
+        id: s.id,
+        stock_code: s.stock_code,
+        currentMarket: s.market,
+        newMarket: cls ? dartClsToMarket(cls) : null,
+      };
+    },
     CONCURRENCY,
     (done, total) => console.log(`  progress ${done}/${total}`)
   );
@@ -176,14 +180,21 @@ async function main() {
   // 변경분만 추출 + market별 그룹핑
   const byMarket = new Map<string, number[]>();
   let unchanged = 0;
+  let fetchFailed = 0;
   for (const r of fetched) {
+    if (r.newMarket == null) {
+      fetchFailed += 1;
+      continue;
+    }
     if (r.currentMarket === r.newMarket) {
       unchanged += 1;
       continue;
     }
     (byMarket.get(r.newMarket) ?? byMarket.set(r.newMarket, []).get(r.newMarket)!).push(r.id);
   }
-  console.log(`[enrich] to update: ${[...byMarket.values()].reduce((a, b) => a + b.length, 0)}  unchanged: ${unchanged}`);
+  console.log(
+    `[enrich] to update: ${[...byMarket.values()].reduce((a, b) => a + b.length, 0)}  unchanged: ${unchanged}  fetchFailed: ${fetchFailed}`
+  );
 
   const supabase = getSupabaseServerClient();
   for (const [market, ids] of byMarket) {
