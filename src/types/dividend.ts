@@ -52,6 +52,8 @@ export interface StockDetail {
   market: string;
   market_cap: number | null;
   sector: string | null;
+  /** 가장 최근 거래일 종가 (원) */
+  current_price: number | null;
   /** 가장 최근 배당수익률 (참고치) */
   latest_dividend_yield: number | null;
 }

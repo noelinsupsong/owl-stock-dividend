@@ -21,6 +21,7 @@ interface StockRow {
   stock_code: string;
   market: string;
   market_cap: number | null;
+  current_price: number | null;
 }
 
 async function fetchAllStocks(): Promise<StockRow[]> {
@@ -31,7 +32,7 @@ async function fetchAllStocks(): Promise<StockRow[]> {
   while (true) {
     const { data, error } = await supabase
       .from("stocks")
-      .select("id, stock_code, market, market_cap")
+      .select("id, stock_code, market, market_cap, current_price")
       .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw new Error(`Fetch stocks failed: ${error.message}`);
@@ -94,64 +95,68 @@ async function main() {
   const idByCode = new Map<string, StockRow>();
   for (const s of stocks) idByCode.set(s.stock_code, s);
 
-  // ISIN의 srtnCd로 매칭
-  // 시세 API items는 srtnCd 기준이 더 정확 (우선주 포함)
+  // 시세 API items는 srtnCd 기준 매칭 (우선주 stock_code 포함)
+  // (market, market_cap, current_price) 동일 tuple끼리 그룹핑하여 batch update.
+  type Update = {
+    market: string;
+    market_cap: number | null;
+    current_price: number | null;
+    ids: number[];
+  };
   let matched = 0;
   let updated = 0;
-  const byMarketUpdates = new Map<string, { id: number; market_cap: number | null }[]>();
+  const groupKey = (m: string, c: number | null, p: number | null) =>
+    `${m}__${c ?? "null"}__${p ?? "null"}`;
+  const groups = new Map<string, Update>();
+
   for (const it of items) {
     const stock = idByCode.get(it.srtnCd);
     if (!stock) continue;
     matched += 1;
 
-    const newCap = Number(it.mrktTotAmt);
+    const cap = Number(it.mrktTotAmt);
+    const price = Number(it.clpr);
     const newMarket = it.mrktCtg || "ETC";
-    const capValue = Number.isFinite(newCap) && newCap > 0 ? newCap : null;
+    const capValue = Number.isFinite(cap) && cap > 0 ? cap : null;
+    const priceValue = Number.isFinite(price) && price > 0 ? price : null;
 
-    const changed =
-      stock.market !== newMarket || stock.market_cap !== capValue;
-    if (!changed) continue;
+    if (
+      stock.market === newMarket &&
+      stock.market_cap === capValue &&
+      stock.current_price === priceValue
+    ) {
+      continue;
+    }
     updated += 1;
 
-    (byMarketUpdates.get(newMarket) ??
-      byMarketUpdates.set(newMarket, []).get(newMarket)!).push({
-      id: stock.id,
-      market_cap: capValue,
-    });
+    const key = groupKey(newMarket, capValue, priceValue);
+    const g = groups.get(key);
+    if (g) g.ids.push(stock.id);
+    else
+      groups.set(key, {
+        market: newMarket,
+        market_cap: capValue,
+        current_price: priceValue,
+        ids: [stock.id],
+      });
   }
-  console.log(`[ingest-prices] matched=${matched} updates=${updated}`);
-
-  // market 별로 묶어서 chunked update (market_cap은 별도라 단건 단건 update가 필요)
-  // → market만 묶어서 한 번에 update + market_cap은 row별로
-  // 효율을 위해 (market, market_cap) tuple별 그룹핑
-  const groupKey = (m: string, cap: number | null) => `${m}__${cap ?? "null"}`;
-  const groups = new Map<string, { market: string; market_cap: number | null; ids: number[] }>();
-  for (const [market, rows] of byMarketUpdates) {
-    for (const r of rows) {
-      const key = groupKey(market, r.market_cap);
-      const g = groups.get(key);
-      if (g) g.ids.push(r.id);
-      else groups.set(key, { market, market_cap: r.market_cap, ids: [r.id] });
-    }
-  }
-  console.log(`[ingest-prices] update groups: ${groups.size}`);
+  console.log(
+    `[ingest-prices] matched=${matched} updates=${updated} groups=${groups.size}`
+  );
 
   let processed = 0;
-  for (const { market, market_cap, ids } of groups.values()) {
+  for (const { market, market_cap, current_price, ids } of groups.values()) {
     for (let i = 0; i < ids.length; i += 500) {
       const chunk = ids.slice(i, i + 500);
       const { error } = await supabase
         .from("stocks")
-        .update({ market, market_cap })
+        .update({ market, market_cap, current_price })
         .in("id", chunk);
       if (error) throw new Error(`Update failed: ${error.message}`);
       processed += chunk.length;
     }
-    if (groups.size <= 10 || processed % 1000 < 500) {
-      console.log(`  updated ${processed}/${updated}`);
-    }
   }
-  console.log("[ingest-prices] done.");
+  console.log(`[ingest-prices] done. updated=${processed}`);
 }
 
 main().catch((err) => {

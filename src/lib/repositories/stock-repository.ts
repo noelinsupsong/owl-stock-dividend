@@ -13,6 +13,7 @@ interface StockRow {
   market: string;
   market_cap: number | null;
   sector: string | null;
+  current_price: number | null;
 }
 
 interface DividendRow {
@@ -30,7 +31,7 @@ async function getStockRowByCode(code: string): Promise<StockRow | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("stocks")
-    .select("id, stock_code, stock_name, market, market_cap, sector")
+    .select("id, stock_code, stock_name, market, market_cap, sector, current_price")
     .eq("stock_code", code)
     .maybeSingle();
   if (error) throw new Error(`getStockRowByCode failed: ${error.message}`);
@@ -57,6 +58,7 @@ export async function getStockDetail(code: string): Promise<StockDetail | null> 
     market: stock.market,
     market_cap: stock.market_cap,
     sector: stock.sector,
+    current_price: stock.current_price,
     latest_dividend_yield: (latest?.dividend_yield as number | null) ?? null,
   };
 }

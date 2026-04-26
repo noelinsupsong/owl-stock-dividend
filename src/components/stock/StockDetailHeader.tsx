@@ -1,5 +1,5 @@
 import type { StockDetail } from "@/types/dividend";
-import { formatMarketCap, formatPercent } from "@/lib/format";
+import { formatKRW, formatMarketCap, formatPercent } from "@/lib/format";
 
 interface Props {
   detail: StockDetail;
@@ -42,7 +42,13 @@ export function StockDetailHeader({ detail }: Props) {
           hint="가장 최근 사업연도 기준"
         />
         <Stat label="시장구분" value={detail.market} />
-        <Stat label="현재가" value="-" hint="실시간 시세 미연동" />
+        <Stat
+          label="현재가"
+          value={
+            detail.current_price != null ? `${formatKRW(detail.current_price)}원` : "-"
+          }
+          hint="가장 최근 거래일 종가"
+        />
       </dl>
     </section>
   );
