@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { AdSense } from "@/components/ads/AdSense";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { StockSearch } from "@/components/search/StockSearch";
 import { getLastIngestTime } from "@/lib/repositories/dividend-repository";
@@ -50,6 +51,11 @@ export default async function Home() {
           <StockSearch />
         </Suspense>
       </header>
+
+      <AdSense
+        slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP_BANNER}
+        className="mb-4 sm:mb-6"
+      />
 
       <Suspense fallback={<CalendarFallback />}>
         <CalendarView />

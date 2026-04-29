@@ -9,7 +9,8 @@
     "lint": "next lint",
     "ingest:dividends": "tsx scripts/ingest-dividends.ts",
     "ingest:stocks": "tsx scripts/ingest-stocks.ts",
-    "ingest:prices": "tsx scripts/ingest-prices.ts"
+    "ingest:prices": "tsx scripts/ingest-prices.ts",
+    "ingest:etfs": "tsx scripts/ingest-etfs.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
@@ -24,6 +25,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@next/swc-win32-x64-msvc": "^15.5.15",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",

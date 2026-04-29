@@ -8,9 +8,9 @@ interface Props {
 }
 
 const OPTIONS: { value: Market; label: string }[] = [
-  { value: "ALL", label: "전체" },
   { value: "KOSPI", label: "KOSPI" },
   { value: "KOSDAQ", label: "KOSDAQ" },
+  { value: "ETF", label: "ETF" },
 ];
 
 export function MarketFilter({ market, onChange }: Props) {
@@ -18,7 +18,7 @@ export function MarketFilter({ market, onChange }: Props) {
     <div
       className="inline-flex rounded-lg border border-neutral-200 bg-white p-1 dark:border-neutral-800 dark:bg-neutral-950"
       role="radiogroup"
-      aria-label="시장 필터"
+      aria-label="카테고리 필터"
     >
       {OPTIONS.map((opt) => {
         const active = market === opt.value;

@@ -28,7 +28,11 @@ export function CalendarView() {
   const initialYear = Number(searchParams.get("year")) || today.getFullYear();
   const initialMonth = Number(searchParams.get("month")) || today.getMonth() + 1;
   const initialMode = (searchParams.get("mode") as CalendarMode) || "payment";
-  const initialMarket = (searchParams.get("market") as Market) || "ALL";
+  const rawMarket = searchParams.get("market") as Market | null;
+  const initialMarket: Market =
+    rawMarket === "KOSPI" || rawMarket === "KOSDAQ" || rawMarket === "ETF"
+      ? rawMarket
+      : "KOSPI";
 
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);
@@ -45,7 +49,7 @@ export function CalendarView() {
     params.set("year", String(year));
     params.set("month", String(month));
     params.set("mode", mode);
-    if (market !== "ALL") params.set("market", market);
+    params.set("market", market);
     router.replace(`/?${params.toString()}`, { scroll: false });
   }, [year, month, mode, market, router]);
 

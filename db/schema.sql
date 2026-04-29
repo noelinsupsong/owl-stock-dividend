@@ -4,16 +4,17 @@
 
 -- 종목 기본정보
 CREATE TABLE IF NOT EXISTS stocks (
-  id            SERIAL PRIMARY KEY,
-  stock_code    VARCHAR(10) UNIQUE NOT NULL,    -- 종목코드 (예: 005930)
-  isin_code     VARCHAR(20),                    -- 표준 ISIN 코드
-  corp_code     VARCHAR(20),                    -- DART 고유번호 (8자리)
-  stock_name    VARCHAR(100) NOT NULL,          -- 종목명 (예: 삼성전자)
-  market        VARCHAR(10) NOT NULL,           -- 시장구분 (KOSPI / KOSDAQ)
-  market_cap    BIGINT,                         -- 시가총액 (원)
-  sector        VARCHAR(50),                    -- 업종
-  created_at    TIMESTAMPTZ DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ DEFAULT NOW()
+  id              SERIAL PRIMARY KEY,
+  stock_code      VARCHAR(10) UNIQUE NOT NULL,        -- 종목코드 (예: 005930)
+  isin_code       VARCHAR(20),                        -- 표준 ISIN 코드
+  corp_code       VARCHAR(20),                        -- DART 고유번호 (8자리)
+  stock_name      VARCHAR(100) NOT NULL,              -- 종목명 (예: 삼성전자)
+  market          VARCHAR(10) NOT NULL,               -- 상장시장 (KOSPI / KOSDAQ / KONEX)
+  instrument_type VARCHAR(10) NOT NULL DEFAULT 'STOCK', -- 증권 유형 (STOCK / ETF)
+  market_cap      BIGINT,                             -- 시가총액 (원)
+  sector          VARCHAR(50),                        -- 업종
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 배당 이벤트
@@ -50,6 +51,8 @@ CREATE INDEX IF NOT EXISTS idx_dividend_record_date   ON dividend_events(record_
 CREATE INDEX IF NOT EXISTS idx_dividend_stock         ON dividend_events(stock_id);
 CREATE INDEX IF NOT EXISTS idx_stocks_market_cap      ON stocks(market_cap DESC);
 CREATE INDEX IF NOT EXISTS idx_stocks_name            ON stocks(stock_name);
+CREATE INDEX IF NOT EXISTS idx_stocks_instrument_type
+  ON stocks(instrument_type) WHERE instrument_type <> 'STOCK';
 
 -- updated_at 자동 갱신 트리거
 CREATE OR REPLACE FUNCTION set_updated_at()

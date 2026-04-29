@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 const SITE_NAME = "Owl Stock Dividend";
@@ -54,10 +55,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   return (
     <html lang="ko">
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}
+        {adsenseClient && (
+          <Script
+            id="google-adsense"
+            async
+            strategy="afterInteractive"
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+          />
+        )}
       </body>
     </html>
   );

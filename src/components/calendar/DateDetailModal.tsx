@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { AdSense } from "@/components/ads/AdSense";
 import type {
   CalendarMode,
   DateDetailEvent,
@@ -125,6 +126,13 @@ export function DateDetailModal({ date, mode, market, onClose }: Props) {
                 <DetailRow key={e.stock_code} event={e} />
               ))}
             </ul>
+          )}
+          {events && events.length > 0 && (
+            <AdSense
+              key={date}
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_MODAL}
+              className="mt-4"
+            />
           )}
         </div>
       </div>

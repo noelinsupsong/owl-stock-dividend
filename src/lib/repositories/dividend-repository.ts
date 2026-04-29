@@ -14,6 +14,7 @@ function dateColumn(mode: CalendarMode): "payment_date" | "ex_dividend_date" {
   return mode === "payment" ? "payment_date" : "ex_dividend_date";
 }
 
+
 /** YYYY-MM의 첫날과 다음달 첫날(배타)을 반환 */
 function monthRange(year: number, month: number): { from: string; to: string } {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -48,15 +49,20 @@ export async function getCalendarMonth(
       ${col},
       dividend_per_share,
       dividend_type,
-      stock:stocks!inner ( stock_code, stock_name, market, market_cap )
+      stock:stocks!inner ( stock_code, stock_name, market, market_cap, instrument_type )
     `
     )
     .gte(col, from)
     .lt(col, to)
     .not(col, "is", null);
 
-  if (market !== "ALL") {
-    query = query.eq("stock.market", market);
+  // 카테고리 필터: ETF는 instrument_type, 나머지는 market+instrument_type='STOCK' (ETF 제외)
+  if (market === "ETF") {
+    query = query.eq("stock.instrument_type", "ETF");
+  } else if (market !== "ALL") {
+    query = query
+      .eq("stock.market", market)
+      .eq("stock.instrument_type", "STOCK");
   }
 
   const { data, error } = await query;
@@ -122,13 +128,17 @@ export async function getDateDetail(
       yoy_change,
       dividend_type,
       fiscal_year,
-      stock:stocks!inner ( stock_code, stock_name, market, market_cap )
+      stock:stocks!inner ( stock_code, stock_name, market, market_cap, instrument_type )
     `
     )
     .eq(col, date);
 
-  if (market !== "ALL") {
-    query = query.eq("stock.market", market);
+  if (market === "ETF") {
+    query = query.eq("stock.instrument_type", "ETF");
+  } else if (market !== "ALL") {
+    query = query
+      .eq("stock.market", market)
+      .eq("stock.instrument_type", "STOCK");
   }
 
   const { data, error } = await query;
@@ -199,7 +209,7 @@ export async function searchStocks(
 
   const builder = supabase
     .from("stocks")
-    .select("stock_code, stock_name, market")
+    .select("stock_code, stock_name, market, instrument_type")
     .order("market_cap", { ascending: false, nullsFirst: false })
     .limit(limit);
 
