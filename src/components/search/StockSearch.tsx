@@ -126,8 +126,7 @@ export function StockSearch() {
               >
                 <span className="font-medium">{item.stock_name}</span>
                 <span className="text-xs text-neutral-500">
-                  {item.stock_code} ·{" "}
-                  {item.instrument_type === "ETF" ? "ETF" : item.market}
+                  {item.stock_code} · {item.market}
                 </span>
               </button>
             </li>

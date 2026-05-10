@@ -7,7 +7,7 @@ const ParamsSchema = z.object({
 });
 const QuerySchema = z.object({
   type: z.enum(["payment", "ex_dividend"]).default("payment"),
-  market: z.enum(["ALL", "KOSPI", "KOSDAQ", "ETF", "KONEX", "ETC"]).default("ALL"),
+  market: z.enum(["ALL", "KOSPI", "KOSDAQ", "KONEX", "ETC"]).default("ALL"),
 });
 
 export async function GET(

@@ -10,7 +10,6 @@ interface Props {
 const OPTIONS: { value: Market; label: string }[] = [
   { value: "KOSPI", label: "KOSPI" },
   { value: "KOSDAQ", label: "KOSDAQ" },
-  { value: "ETF", label: "ETF" },
 ];
 
 export function MarketFilter({ market, onChange }: Props) {

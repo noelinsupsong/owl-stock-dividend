@@ -1,14 +1,8 @@
 /** 캘린더 모드: 배당 입금일 vs 배당락일 */
 export type CalendarMode = "payment" | "ex_dividend";
 
-/**
- * 캘린더 카테고리 필터.
- *  - ALL: 전체
- *  - KOSPI / KOSDAQ / KONEX: stocks.market 일치 + instrument_type='STOCK' (ETF 제외)
- *  - ETF: instrument_type='ETF' (시장 무관 — 한국 ETF는 모두 유가증권)
- *  - ETC: legacy
- */
-export type MarketFilter = "ALL" | "KOSPI" | "KOSDAQ" | "ETF" | "KONEX" | "ETC";
+/** 시장 필터: ALL은 전체, 그 외는 stocks.market 컬럼과 정확 일치 */
+export type MarketFilter = "ALL" | "KOSPI" | "KOSDAQ" | "KONEX" | "ETC";
 
 /** 캘린더 셀에 표시되는 종목 요약 (시총 상위) */
 export interface CalendarEventSummary {
@@ -49,7 +43,6 @@ export interface StockSearchResult {
   stock_code: string;
   stock_name: string;
   market: string;
-  instrument_type: "STOCK" | "ETF";
 }
 
 /** 종목 상세: 기본 정보 */
@@ -57,7 +50,6 @@ export interface StockDetail {
   stock_code: string;
   stock_name: string;
   market: string;
-  instrument_type: "STOCK" | "ETF";
   market_cap: number | null;
   sector: string | null;
   /** 가장 최근 거래일 종가 (원) */

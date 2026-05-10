@@ -30,9 +30,7 @@ export function CalendarView() {
   const initialMode = (searchParams.get("mode") as CalendarMode) || "payment";
   const rawMarket = searchParams.get("market") as Market | null;
   const initialMarket: Market =
-    rawMarket === "KOSPI" || rawMarket === "KOSDAQ" || rawMarket === "ETF"
-      ? rawMarket
-      : "KOSPI";
+    rawMarket === "KOSPI" || rawMarket === "KOSDAQ" ? rawMarket : "KOSPI";
 
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);

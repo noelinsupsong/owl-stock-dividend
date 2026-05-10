@@ -49,20 +49,15 @@ export async function getCalendarMonth(
       ${col},
       dividend_per_share,
       dividend_type,
-      stock:stocks!inner ( stock_code, stock_name, market, market_cap, instrument_type )
+      stock:stocks!inner ( stock_code, stock_name, market, market_cap )
     `
     )
     .gte(col, from)
     .lt(col, to)
     .not(col, "is", null);
 
-  // 카테고리 필터: ETF는 instrument_type, 나머지는 market+instrument_type='STOCK' (ETF 제외)
-  if (market === "ETF") {
-    query = query.eq("stock.instrument_type", "ETF");
-  } else if (market !== "ALL") {
-    query = query
-      .eq("stock.market", market)
-      .eq("stock.instrument_type", "STOCK");
+  if (market !== "ALL") {
+    query = query.eq("stock.market", market);
   }
 
   const { data, error } = await query;
@@ -128,17 +123,13 @@ export async function getDateDetail(
       yoy_change,
       dividend_type,
       fiscal_year,
-      stock:stocks!inner ( stock_code, stock_name, market, market_cap, instrument_type )
+      stock:stocks!inner ( stock_code, stock_name, market, market_cap )
     `
     )
     .eq(col, date);
 
-  if (market === "ETF") {
-    query = query.eq("stock.instrument_type", "ETF");
-  } else if (market !== "ALL") {
-    query = query
-      .eq("stock.market", market)
-      .eq("stock.instrument_type", "STOCK");
+  if (market !== "ALL") {
+    query = query.eq("stock.market", market);
   }
 
   const { data, error } = await query;
@@ -209,7 +200,7 @@ export async function searchStocks(
 
   const builder = supabase
     .from("stocks")
-    .select("stock_code, stock_name, market, instrument_type")
+    .select("stock_code, stock_name, market")
     .order("market_cap", { ascending: false, nullsFirst: false })
     .limit(limit);
 

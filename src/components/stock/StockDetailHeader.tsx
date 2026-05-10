@@ -8,14 +8,11 @@ interface Props {
 const MARKET_BADGE: Record<string, string> = {
   KOSPI: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
   KOSDAQ: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-  ETF: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
 };
 
 export function StockDetailHeader({ detail }: Props) {
-  const badgeKey = detail.instrument_type === "ETF" ? "ETF" : detail.market;
-  const badgeLabel = detail.instrument_type === "ETF" ? "ETF" : detail.market;
   const badgeClass =
-    MARKET_BADGE[badgeKey] ??
+    MARKET_BADGE[detail.market] ??
     "bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300";
 
   return (
@@ -30,7 +27,7 @@ export function StockDetailHeader({ detail }: Props) {
         <span
           className={`rounded px-2 py-0.5 text-xs font-medium ${badgeClass}`}
         >
-          {badgeLabel}
+          {detail.market}
         </span>
         {detail.sector && (
           <span className="text-xs text-neutral-500">{detail.sector}</span>
@@ -44,7 +41,7 @@ export function StockDetailHeader({ detail }: Props) {
           value={formatPercent(detail.latest_dividend_yield)}
           hint="가장 최근 사업연도 기준"
         />
-        <Stat label="시장구분" value={badgeLabel} />
+        <Stat label="시장구분" value={detail.market} />
         <Stat
           label="현재가"
           value={

@@ -9,8 +9,7 @@
     "lint": "next lint",
     "ingest:dividends": "tsx scripts/ingest-dividends.ts",
     "ingest:stocks": "tsx scripts/ingest-stocks.ts",
-    "ingest:prices": "tsx scripts/ingest-prices.ts",
-    "ingest:etfs": "tsx scripts/ingest-etfs.ts"
+    "ingest:prices": "tsx scripts/ingest-prices.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",

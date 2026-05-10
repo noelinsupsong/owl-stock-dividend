@@ -11,7 +11,6 @@ interface StockRow {
   stock_code: string;
   stock_name: string;
   market: string;
-  instrument_type: "STOCK" | "ETF";
   market_cap: number | null;
   sector: string | null;
   current_price: number | null;
@@ -32,7 +31,7 @@ async function getStockRowByCode(code: string): Promise<StockRow | null> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("stocks")
-    .select("id, stock_code, stock_name, market, instrument_type, market_cap, sector, current_price")
+    .select("id, stock_code, stock_name, market, market_cap, sector, current_price")
     .eq("stock_code", code)
     .maybeSingle();
   if (error) throw new Error(`getStockRowByCode failed: ${error.message}`);
@@ -57,7 +56,6 @@ export async function getStockDetail(code: string): Promise<StockDetail | null> 
     stock_code: stock.stock_code,
     stock_name: stock.stock_name,
     market: stock.market,
-    instrument_type: stock.instrument_type,
     market_cap: stock.market_cap,
     sector: stock.sector,
     current_price: stock.current_price,

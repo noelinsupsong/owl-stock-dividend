@@ -6,7 +6,7 @@ const QuerySchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
   month: z.coerce.number().int().min(1).max(12),
   type: z.enum(["payment", "ex_dividend"]).default("payment"),
-  market: z.enum(["ALL", "KOSPI", "KOSDAQ", "ETF", "KONEX", "ETC"]).default("ALL"),
+  market: z.enum(["ALL", "KOSPI", "KOSDAQ", "KONEX", "ETC"]).default("ALL"),
 });
 
 export async function GET(req: Request) {

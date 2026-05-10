@@ -29,7 +29,6 @@ interface StockRow {
   market: string;
   market_cap: number | null;
   current_price: number | null;
-  instrument_type: string;
 }
 
 async function findLatestDateWithData(): Promise<string> {
@@ -55,8 +54,7 @@ async function fetchAllStocks(): Promise<StockRow[]> {
   while (true) {
     const { data, error } = await supabase
       .from("stocks")
-      .select("id, stock_code, market, market_cap, current_price, instrument_type")
-      .eq("instrument_type", "STOCK")
+      .select("id, stock_code, market, market_cap, current_price")
       .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) throw new Error(`Fetch stocks failed: ${error.message}`);

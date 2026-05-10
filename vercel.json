@@ -8,10 +8,6 @@
     {
       "path": "/api/cron/ingest-prices",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/ingest-etfs",
-      "schedule": "30 9 * * *"
     }
   ]
 }
