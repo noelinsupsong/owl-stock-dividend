@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 const SITE_NAME = "Owl Stock Dividend";
@@ -58,8 +59,9 @@ export default function RootLayout({
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   return (
     <html lang="ko">
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
+      <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
+        <div className="flex-1">{children}</div>
+        <Footer />
         {adsenseClient && (
           <Script
             id="google-adsense"
